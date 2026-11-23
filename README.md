@@ -11,11 +11,58 @@ This is community packaging and is not affiliated with the openGym project.
 
 1. Settings → Apps → App store → ⋮ → Repositories, add `https://github.com/syky27/hassio-opengym`.
 2. Install **openGym**, start it, turn on **Show in sidebar**, and open it.
-3. Create your profile with a **password** (the first profile becomes the admin).
+3. Create your profile with a **password** (the first profile becomes the admin). [Why not a passkey?](#signing-in-passwords-not-passkeys)
 
 [![Add repository](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fsyky27%2Fhassio-opengym)
 
 Details, options and limits: [opengym/DOCS.md](opengym/DOCS.md).
+
+## Updating
+
+The app and the phone app integration are two separate pieces and update separately.
+
+**The openGym app**
+
+1. Settings → Apps → App store → ⋮ → **Check for updates**.
+2. Open **openGym** and press **Update**.
+
+Home Assistant rebuilds the app on your device, which takes a few minutes. Profiles and
+workouts are kept. Home Assistant also checks for updates on its own, so the update may already
+be listed under Settings.
+
+**The phone app integration** (only if you installed it)
+
+- Installed through HACS: HACS lists the update; download it and restart Home Assistant.
+- Copied by hand: replace `config/custom_components/opengym_proxy` with the new folder and
+  restart Home Assistant.
+
+Updating the app never installs or updates the integration; see
+[Phone app through Nabu Casa](#phone-app-through-nabu-casa) for the first install.
+
+## Signing in: passwords, not passkeys
+
+Home Assistant decides who can open the panel; openGym then has its own profiles. This app turns
+on openGym's **password sign-in** and expects you to use it. Passkeys, openGym's usual default,
+do not fit behind Home Assistant:
+
+- **A passkey belongs to one hostname.** The browser ties it to the site's hostname when it is
+  created and only offers it there.
+- **openGym accepts exactly one address.** The server is configured with a single origin and
+  rejects a passkey sign-in from any other.
+- **Home Assistant has several.** `homeassistant.local`, a LAN IP, your Nabu Casa address: a
+  passkey made on one fails on the others.
+- **Local addresses usually cannot use passkeys at all.** Browsers allow them only over `https`
+  and never on a bare IP address, so on `http://192.168.x.x:8123` openGym reports that the
+  browser does not support passkeys.
+
+So the app leaves openGym's origin on a neutral `http` value and uses passwords, which work on
+every address.
+
+If you only ever open openGym at one `https` address (your Nabu Casa one), you can have
+passkeys: set the app's **Origin** option to `https://<your-nabu-casa-address>` and restart.
+The trade-off: sign-in then stops working on plain-`http` local addresses, because the session
+cookie becomes https-only. This option is untested, and passkeys may not work inside the
+Home Assistant companion app's embedded browser; use Safari or another real browser for them.
 
 ## What works where
 
