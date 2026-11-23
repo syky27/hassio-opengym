@@ -1,0 +1,21 @@
+name: Build
+on:
+  pull_request:
+  push:
+    branches: [master]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The Dockerfile asserts on upstream's nginx template and runs `nginx -t`, so a release
+      # that this wrapper no longer fits fails here instead of on someone's Home Assistant.
+      - run: docker build -t opengym-app opengym
+      - name: Starts and answers
+        run: |
+          mkdir data && yq -o=json '.options' opengym/config.yaml > data/options.json
+          docker run -d --name app -v "$PWD/data:/data" -p 8080:8080 opengym-app
+          for i in $(seq 20); do curl -fs http://localhost:8080/api/health && exit 0; sleep 1; done
+          docker logs app; exit 1

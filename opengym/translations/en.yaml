@@ -1,0 +1,23 @@
+configuration:
+  password_login:
+    name: Password sign-in
+    description: Sign in with a profile name and password. Leave on - passkeys are tied to one hostname and do not work through Home Assistant.
+  first_user_admin:
+    name: First profile is admin
+    description: The first profile created on an empty instance becomes its admin.
+  allow_guest:
+    name: Allow guests
+    description: Show "Continue without account" (guest data stays in the browser).
+  invite_only:
+    name: Invite only
+    description: New profiles need an invite code from the admin dashboard. Create your own profile first.
+  session_days:
+    name: Session length (days)
+  default_lang:
+    name: Default language
+    description: "Language code such as en, de, cs, fr. Empty: English or the browser's language."
+  origin:
+    name: Origin (advanced)
+    description: Only for passkeys - the one https address you always open Home Assistant at, e.g. https://xxxx.ui.nabu.casa. Sign-in then fails on plain http addresses.
+network:
+  8080/tcp: Direct access for the openGym phone app on your LAN
