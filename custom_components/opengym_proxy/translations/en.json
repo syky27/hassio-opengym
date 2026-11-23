@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "openGym phone app access",
+        "description": "Makes the openGym app's API reachable at /opengym on your Home Assistant address, without a Home Assistant login, so the openGym phone app can pair and sync, also through Home Assistant Cloud. openGym's own pairing codes and tokens still guard it. The openGym app must be installed and running.",
+        "data": { "upstream": "openGym app address (internal)" }
+      }
+    },
+    "error": { "cannot_connect": "No openGym answered at that address. Is the app running?" },
+    "abort": { "single_instance_allowed": "Already set up." }
+  }
+}

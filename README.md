@@ -22,7 +22,7 @@ Details, options and limits: [opengym/DOCS.md](opengym/DOCS.md).
 | | At home (local address) | Away, through Nabu Casa |
 |---|---|---|
 | openGym in the Home Assistant sidebar / companion app | yes | yes |
-| openGym phone app (iPhone, Android) connected to this server | yes, with port 8080 enabled | no |
+| openGym phone app (iPhone, Android) connected to this server | yes | only with the extra integration below |
 | MCP server for AI clients | yes, with port 8080 and the MCP option enabled | no |
 
 ### Why the phone app and MCP cannot go through Nabu Casa
@@ -48,6 +48,26 @@ only by openGym's own sign-in and tokens. Do not forward that port to the intern
 use the phone app or MCP away from home you need your own route to port 8080 with https in front
 (a VPN such as Tailscale or WireGuard, or a Cloudflare Tunnel); this repository does not set that
 up.
+
+### Phone app through Nabu Casa
+
+This repository also contains a small Home Assistant integration, **openGym phone app access**,
+that gives the phone app a way in. It serves openGym's API, and only the API, at
+`/opengym/api/…` on your Home Assistant address without the Home Assistant login, and passes it
+to the openGym app. Because it is an ordinary Home Assistant path, Nabu Casa carries it.
+
+1. Install it: HACS → ⋮ → Custom repositories → add this repository as type **Integration**,
+   then download "openGym phone app access". Or copy `custom_components/opengym_proxy` into
+   your Home Assistant `config/custom_components/`. Restart Home Assistant.
+2. Settings → Devices & services → Add integration → **openGym phone app access** → Submit.
+3. In openGym (in the sidebar): Settings → Account → Pair the mobile app, to get a code.
+4. In the phone app: Connect to my server, address
+   `https://<your-nabu-casa-address>/opengym` (mind the `/opengym`), and the code.
+
+What you are agreeing to: openGym's API is then reachable from the internet by anyone who knows
+your Nabu Casa address, guarded by openGym's own pairing codes, tokens and password sign-in
+instead of Home Assistant's login. Creating profiles through this path is blocked; make them in
+the sidebar panel. Use real passwords. Removing the integration closes the path at once.
 
 ### MCP on your LAN
 

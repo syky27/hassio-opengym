@@ -29,13 +29,15 @@ other. If you only ever use one https address, set **Origin** to it and passkeys
 ## The phone app
 
 The openGym iPhone/Android app talks to a server directly and cannot go through Home
-Assistant's sign-in, so it cannot connect over Nabu Casa. Two ways to use a phone:
+Assistant's sign-in, so on its own it cannot connect over Nabu Casa. Three ways to use a phone:
 
 - Open openGym in the Home Assistant companion app or a browser. This works everywhere.
-- At home only: enable port 8080 under Configuration → Network, then in the phone app choose
-  "Connect to my server" with `http://<home-assistant-ip>:8080` and a pairing code from
-  Settings → Account → Pair the mobile app. That port has no Home Assistant sign-in in front
-  of it, only openGym's own; do not forward it to the internet.
+- Install the **openGym phone app access** integration from the same repository (see its
+  README). The phone app then connects to `https://<your-home-assistant-address>/opengym`, also
+  through Nabu Casa, with a pairing code from Settings → Account → Pair the mobile app.
+- At home only: enable port 8080 under Configuration → Network and use
+  `http://<home-assistant-ip>:8080`. That port has no Home Assistant sign-in in front of it,
+  only openGym's own; do not forward it to the internet.
 
 ## MCP for AI clients (LAN only)
 
