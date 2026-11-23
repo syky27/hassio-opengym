@@ -244,8 +244,11 @@ come from upstream's images, under upstream's terms (see its
 [NOTICE](https://github.com/DuarteSantos8/openGym/blob/main/NOTICE.md) — the exercise media is
 licensed for use within openGym only).
 
-A scheduled workflow opens a pull request when upstream publishes a release. Once merged,
-Home Assistant offers the update.
+A nightly workflow follows openGym: when upstream publishes a release, it moves this repository
+to that version, builds and starts the result, and only if that works commits it and publishes a
+GitHub release with the same number. Home Assistant then offers the app update, and HACS the
+integration update. Versions are openGym's (`1.4.5`), with a fourth number for changes to the
+packaging alone (`1.4.5.1`).
 
 ## License
 

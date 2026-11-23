@@ -1,0 +1,75 @@
+name: Release
+
+# One workflow does both halves, because a push made with the workflow's own token does not
+# start other workflows:
+#   1. nightly: if openGym published a newer release, bump to it, test it, commit to master;
+#   2. always: if the version in opengym/config.yaml has no GitHub release yet, publish one.
+# Home Assistant offers the app update from config.yaml's version; HACS offers the integration
+# update from the GitHub release.
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  push:
+    branches: [master]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: release
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Follow openGym
+        id: bump
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          new=$(gh api repos/DuarteSantos8/openGym/releases/latest --jq .tag_name | sed 's/^v//')
+          old=$(sed -n 's/^ARG OPENGYM_VERSION=//p' opengym/Dockerfile)
+          echo "$new" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'
+          # Only ever forwards: "latest" moving back (a withdrawn release) changes nothing here.
+          if [ "$new" = "$old" ] || [ "$(printf '%s\n%s\n' "$old" "$new" | sort -V | tail -1)" != "$new" ]; then
+            echo "openGym $new, packaged $old: nothing to do"; exit 0
+          fi
+          # The images for a release are published a little after the release itself.
+          for image in api web mcp; do
+            if ! docker manifest inspect "ghcr.io/duartesantos8/opengym-$image:$new" > /dev/null 2>&1; then
+              echo "::notice::openGym $new is out but its $image image is not published yet; trying again tomorrow"; exit 0
+            fi
+          done
+          sh .github/bump.sh "$new"
+          echo "version=$new" >> "$GITHUB_OUTPUT"
+
+      # The Dockerfile asserts on upstream's nginx template and runs `nginx -t`, so a release this
+      # wrapper no longer fits fails here, and nothing below is committed or published.
+      - name: Build
+        run: docker build -t opengym-app opengym
+      - name: Starts and answers
+        run: |
+          mkdir data && yq -o=json '.options' opengym/config.yaml > data/options.json
+          docker run -d --name app -v "$PWD/data:/data" -p 8080:8080 opengym-app
+          for i in $(seq 20); do curl -fs http://localhost:8080/api/health && exit 0; sleep 1; done
+          docker logs app; exit 1
+
+      - name: Commit the bump
+        if: steps.bump.outputs.version
+        run: |
+          rm -rf data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "openGym ${{ steps.bump.outputs.version }}"
+          git push origin HEAD:master
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          version=$(yq '.version' opengym/config.yaml)
+          if gh release view "$version" > /dev/null 2>&1; then echo "release $version exists"; exit 0; fi
+          # This version's section of the changelog is the release text.
+          awk -v v="## $version" '$0==v{on=1;next} /^## /{on=0} on' opengym/CHANGELOG.md > notes.md
+          gh release create "$version" --target "$(git rev-parse HEAD)" --title "$version" --notes-file notes.md

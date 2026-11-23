@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # One version for the whole repository: the app's, which is also the release tag HACS shows.
+      - name: App and integration carry the same version
+        run: test "$(yq '.version' opengym/config.yaml)" = "$(jq -r .version custom_components/opengym_proxy/manifest.json)"
       # The Dockerfile asserts on upstream's nginx template and runs `nginx -t`, so a release
       # that this wrapper no longer fits fails here instead of on someone's Home Assistant.
       - run: docker build -t opengym-app opengym
