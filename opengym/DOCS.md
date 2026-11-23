@@ -33,7 +33,7 @@ Assistant's sign-in, so on its own it cannot connect over Nabu Casa. Three ways 
 
 - Open openGym in the Home Assistant companion app or a browser. This works everywhere.
 - Install the **openGym phone app access** integration from the same repository (see its
-  README). The phone app then connects to `https://<your-home-assistant-address>/opengym`, also
+  README, Part 3). The phone app then connects to `https://<your-nabu-casa-address>/opengym`, also
   through Nabu Casa, with a pairing code from Settings → Account → Pair the mobile app.
 - At home only: enable port 8080 under Configuration → Network and use
   `http://<home-assistant-ip>:8080`. That port has no Home Assistant sign-in in front of it,
