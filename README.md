@@ -70,7 +70,12 @@ terminal and paste:
 cd /config && mkdir -p custom_components && wget -qO- https://github.com/syky27/hassio-opengym/archive/refs/heads/master.tar.gz | tar xz --strip-components=2 -C custom_components hassio-opengym-master/custom_components/opengym_proxy
 ```
 
-**With HACS.** HACS → ⋮ → **Custom repositories** → add
+**With HACS.** Press this button and confirm; it opens HACS with this repository filled in.
+Then press **Download**.
+
+[![Open this repository in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=syky27&repository=hassio-opengym&category=integration)
+
+Or by hand: HACS → ⋮ → **Custom repositories** → add
 `https://github.com/syky27/hassio-opengym` as type **Integration**, then download
 "openGym phone app access".
 

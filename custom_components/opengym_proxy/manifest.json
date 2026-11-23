@@ -1,6 +1,7 @@
 {
   "domain": "opengym_proxy",
   "name": "openGym phone app access",
+  "after_dependencies": ["hassio"],
   "codeowners": ["@syky27"],
   "config_flow": true,
   "dependencies": ["http"],
