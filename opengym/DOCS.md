@@ -23,6 +23,7 @@ other. If you only ever use one https address, set **Origin** to it and passkeys
 | Invite only | off | New profiles need an invite code from the admin dashboard. |
 | Session length | 90 | Days a sign-in lasts. |
 | Default language | – | e.g. `de`, `fr`, `pt-BR`. |
+| MCP server | off | AI clients on your LAN, see below. |
 | Origin | – | Advanced, for passkeys: your single https address. |
 
 ## The phone app
@@ -36,6 +37,19 @@ Assistant's sign-in, so it cannot connect over Nabu Casa. Two ways to use a phon
   Settings → Account → Pair the mobile app. That port has no Home Assistant sign-in in front
   of it, only openGym's own; do not forward it to the internet.
 
+## MCP for AI clients (LAN only)
+
+openGym's MCP server lets an AI client read and, if the token allows it, change your plan and
+log. Turn on **MCP server**, enable port 8080 under Configuration → Network, restart, then make a
+token in openGym under Settings → Integrations → API tokens and give the client
+`http://<home-assistant-ip>:8080/mcp` with the header `Authorization: Bearer ogt_…`.
+
+It does not work through Nabu Casa, for the same reason as the phone app: Home Assistant only
+lets requests with a Home Assistant login through, and these clients sign in to openGym with a
+token instead. The Claude/ChatGPT "connector" sign-in also needs openGym on a public https address
+of its own, which this app does not provide. Ignore the MCP address openGym's Settings page
+shows; use the one above.
+
 ## Data and backups
 
 Everything is in the app's data folder and is included in Home Assistant backups (the app is
@@ -43,4 +57,4 @@ stopped for a moment while it is backed up). Restoring a backup restores profile
 
 ## Not included
 
-The AI Coach's bundled runtimes, the MCP endpoint and OIDC sign-in are not set up by this app.
+The AI Coach's bundled runtimes and OIDC sign-in are not set up by this app.

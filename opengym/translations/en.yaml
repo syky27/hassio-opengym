@@ -16,8 +16,11 @@ configuration:
   default_lang:
     name: Default language
     description: "Language code such as en, de, cs, fr. Empty: English or the browser's language."
+  mcp:
+    name: MCP server (LAN only)
+    description: Lets an AI client on your home network use openGym's tools at http://<home-assistant-ip>:8080/mcp with an API token. Also enable port 8080 under Network. Does not work through Nabu Casa.
   origin:
     name: Origin (advanced)
     description: Only for passkeys - the one https address you always open Home Assistant at, e.g. https://xxxx.ui.nabu.casa. Sign-in then fails on plain http addresses.
 network:
-  8080/tcp: Direct access for the openGym phone app on your LAN
+  8080/tcp: Direct access on your LAN for the openGym phone app and MCP clients

@@ -1,5 +1,5 @@
 name: openGym
-version: "1.4.5"
+version: "1.4.5.1"
 slug: opengym
 description: Self-hosted gym & body-weight tracker (unofficial packaging of openGym)
 url: https://github.com/syky27/hassio-opengym
@@ -18,18 +18,20 @@ backup: cold
 ports:
   8080/tcp: null
 ports_description:
-  8080/tcp: Direct access for the openGym phone app on your LAN (off by default)
+  8080/tcp: Direct access on your LAN for the openGym phone app and MCP clients (off by default)
 options:
   password_login: true
   first_user_admin: true
   allow_guest: true
   invite_only: false
   session_days: 90
+  mcp: false
 schema:
   password_login: bool
   first_user_admin: bool
   allow_guest: bool
   invite_only: bool
   session_days: int(1,3650)
+  mcp: bool
   default_lang: str?
   origin: url?
