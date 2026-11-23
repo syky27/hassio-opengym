@@ -17,10 +17,57 @@ This is community packaging and is not affiliated with the openGym project.
 
 Details, options and limits: [opengym/DOCS.md](opengym/DOCS.md).
 
+## What works where
+
+| | At home (local address) | Away, through Nabu Casa |
+|---|---|---|
+| openGym in the Home Assistant sidebar / companion app | yes | yes |
+| openGym phone app (iPhone, Android) connected to this server | yes, with port 8080 enabled | no |
+| MCP server for AI clients | yes, with port 8080 and the MCP option enabled | no |
+
+### Why the phone app and MCP cannot go through Nabu Casa
+
+Home Assistant shows an app's web page through *ingress*: a private path
+(`/api/hassio_ingress/<token>/`) that Home Assistant only serves to a browser carrying a
+**Home Assistant login session cookie**. Nabu Casa remote access forwards your Home Assistant
+address and nothing else, so everything that reaches openGym from outside has passed that check
+first.
+
+- The **phone app** and an **MCP client** are not a browser logged in to Home Assistant. They
+  talk straight to an openGym address and authenticate with an openGym token in an
+  `Authorization` header. They have no Home Assistant session cookie, and no way to get one, so
+  Home Assistant answers them with 401 before openGym ever sees the request.
+- **Claude, ChatGPT and Gemini connectors** have a second problem: they call the MCP address from
+  their own servers and sign in with OAuth, which needs openGym to be at one public https address
+  of its own, with `/.well-known/…` documents at that host's root. Behind ingress the root of the
+  host is Home Assistant, not openGym.
+
+So both need a way in that skips Home Assistant's login. On your home network that is the app's
+optional **port 8080** (Configuration → Network), which reaches openGym directly and is guarded
+only by openGym's own sign-in and tokens. Do not forward that port to the internet as it is. To
+use the phone app or MCP away from home you need your own route to port 8080 with https in front
+(a VPN such as Tailscale or WireGuard, or a Cloudflare Tunnel); this repository does not set that
+up.
+
+### MCP on your LAN
+
+1. Turn on the **MCP server** option, enable port **8080** under Network, restart the app.
+2. In openGym: Settings → Integrations → API tokens → New token. Copy it (shown once).
+3. Point a local client at `http://<home-assistant-ip>:8080/mcp` with the header
+   `Authorization: Bearer ogt_…`, for example:
+
+   ```bash
+   claude mcp add --transport http opengym http://<home-assistant-ip>:8080/mcp --header "Authorization: Bearer ogt_…"
+   ```
+
+openGym's Settings page shows an MCP address built from its configured origin; ignore it and use
+the one above. "Use your subscription" (the Claude/ChatGPT connector sign-in) does not work in
+this setup, for the reason given above.
+
 ## How it is built
 
 Home Assistant builds the app on your device from `opengym/Dockerfile`, which pulls the two
-images upstream publishes (`opengym-api`, `opengym-web`) and puts them in one container behind
+images upstream publishes (`opengym-api`, `opengym-web`, `opengym-mcp`) and puts them in one container behind
 ingress. This repository contains no openGym code and no exercise media; those come from
 upstream's images, under upstream's terms (see its
 [NOTICE](https://github.com/DuarteSantos8/openGym/blob/main/NOTICE.md) — the exercise media is

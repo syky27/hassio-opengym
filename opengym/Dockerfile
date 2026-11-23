@@ -6,7 +6,7 @@ ARG OPENGYM_VERSION=1.4.5
 # script hash) is in the environment, with the two changes ingress needs.
 FROM ghcr.io/duartesantos8/opengym-web:${OPENGYM_VERSION} AS web
 USER root
-ENV NGINX_PORT=8099 BACKEND=127.0.0.1 PORT=3000 BASE_PATH=""
+ENV NGINX_PORT=8099 BACKEND=127.0.0.1 PORT=3000 BASE_PATH="" MCP_BACKEND=127.0.0.1 MCP_PORT=3100
 RUN set -eu; t=/etc/nginx/templates/default.conf.template; \
     # Ingress shows the app in a frame on Home Assistant's own origin: upstream forbids all framing.
     grep -q 'X-Frame-Options "DENY"' "$t"; \
@@ -24,12 +24,17 @@ RUN set -eu; t=/etc/nginx/templates/default.conf.template; \
     grep -q 'listen 8080;' /opengym.conf; grep -q 'ingress_denied' /opengym.conf; grep -q 'api_origin' /opengym.conf; \
     ! grep -q '\${' /opengym.conf
 
+FROM ghcr.io/duartesantos8/opengym-mcp:${OPENGYM_VERSION} AS mcp
+
 FROM ghcr.io/duartesantos8/opengym-api:${OPENGYM_VERSION}
 ARG BUILD_VERSION=dev
 LABEL io.hass.version="${BUILD_VERSION}" io.hass.type="app" io.hass.arch="aarch64|amd64"
 RUN apk add --no-cache nginx jq \
  && ln -sf /dev/stdout /var/log/nginx/access.log && ln -sf /dev/stderr /var/log/nginx/error.log
 COPY --from=web /usr/share/nginx/html /usr/share/nginx/html
+# The optional MCP server (off unless the `mcp` option is on). It imports ../frontend and ../api
+# by relative path, so the three directories keep their places under one root.
+COPY --from=mcp /app /opt/mcp
 COPY --from=web /opengym.conf /etc/nginx/http.d/default.conf
 COPY ingress-guard.conf /etc/nginx/http.d/00-ingress-guard.conf
 COPY run.sh /run.sh
